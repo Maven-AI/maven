@@ -1,26 +1,32 @@
-import express, { Request, Response } from 'express';
-import cors from 'cors';
-import { ORMType, getSchemaForORM } from '../orm/OrmHandler';
-// import { getSchemaForORM } from './ormHandler';
-// import { ORMType } from './types';
+import express, { Request, Response } from "express";
+import cors from "cors";
+import path from "path";
+import { ORMType, getSchemaForORM } from "../orm/OrmHandler";
 
 export function startServer(ormType: ORMType): void {
   const app = express();
   app.use(cors());
   app.use(express.json());
 
-  app.get('/api/schema', async (req: Request, res: Response) => {
+  // Serve the static files from the Vite build output
+  app.use(express.static(path.join(__dirname, "../src/frontend/dist")));
+
+  app.get("/api/schema", async (req: Request, res: Response) => {
     try {
       const schema = await getSchemaForORM(ormType);
       res.json(schema);
     } catch (error) {
-      res.status(500).json({ error: 'Failed to fetch schema' });
+      res.status(500).json({ error: "Failed to fetch schema" });
     }
   });
 
-  const PORT = 5556;
+  // Handle all other routes by serving the index.html file
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "../src/frontend/dist/index.html"));
+  });
+
+  const PORT = 4000;
   app.listen(PORT, () => {
-    console.log(`Server running on <http://localhost>:${PORT}`);
-    // Logic to open the frontend application
+    console.log(`Server running on http://localhost:${PORT}`);
   });
 }
