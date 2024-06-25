@@ -17,7 +17,7 @@ function App() {
 
   return (
     <div>
-      <h1 className="text-center text-3xl">Maven Studio</h1>
+      <h1 className="text-center text-3xl">Maven Studio - Under development</h1>
       {/* {schema ? <pre>{JSON.stringify(schema, null, 2)}</pre> : "Loading..."} */}
     </div>
   );
