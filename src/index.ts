@@ -1,5 +1,2 @@
-console.log("Hello world");
-
-export const add = (a: number, b: number) => {
-  return a + b;
-};
+export { startServer } from './server/server';
+export { runCLI } from './cli/cli';
