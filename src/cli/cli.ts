@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { Command } from "commander";
-import { startServer } from "..";
+import { startServer } from "../index";
 
 export function runCLI() {
   const program = new Command();
@@ -25,6 +25,7 @@ export function runCLI() {
   else if (options.drizzle) ormType = "drizzle";
   else if (options.orm) ormType = options.orm as ORMType;
 
+  // Start the server after the build process completes
   startServer(ormType, connectionString);
 }
 

@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import express, { Request, Response } from "express";
 import cors from "cors";
 import path from "path";
@@ -14,7 +16,7 @@ export async function startServer(
     app.use(cors());
     app.use(express.json());
 
-    app.use(express.static(path.join(__dirname, "../src/frontend/dist")));
+    app.use(express.static(path.join(__dirname, "../dist")));
 
     //     app.get("/api/schema", async (req: Request, res: Response) => {
     //       try {
@@ -45,7 +47,7 @@ export async function startServer(
     //     });
 
     app.get("*", (req, res) => {
-      res.sendFile(path.join(__dirname, "../src/frontend/dist/index.html"));
+      res.sendFile(path.join(__dirname, "../dist/index.html"));
     });
 
     const PORT = 4000;

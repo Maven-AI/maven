@@ -1,15 +1,15 @@
 {
   "name": "maven-studio",
   "license": "MIT",
-  "version": "0.0.1",
+  "version": "0.0.24",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "bin": {
-    "maven-studio": "./dist/cli.js"
+    "maven-studio": "./dist/index.js"
   },
   "scripts": {
-    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "build": "tsup src/index.ts --format cjs,esm --dts && cd src/frontend && npm install && npm run build",
     "release": "npm run build",
     "lint": "tsc"
   },
@@ -29,6 +29,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
+    "http-proxy-middleware": "^3.0.0",
     "jsonwebtoken": "^9.0.2"
   },
   "keywords": [],
