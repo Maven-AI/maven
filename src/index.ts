@@ -7,11 +7,9 @@ import { ORMType, getSchemaForORM } from "./orm/OrmHandler";
 
 export async function startServer(
   ormType: ORMType,
-  connectionString: string
+  apiKey?: string
 ): Promise<void> {
   try {
-    // await connectDatabase(ormType, connectionString);
-
     const app = express();
     app.use(cors());
     app.use(express.json());
@@ -21,39 +19,13 @@ export async function startServer(
     app.get("/api/schema", async (req: Request, res: Response) => {
       try {
         const schema = await getSchemaForORM(ormType);
+        console.log(schema);
         res.json(schema);
       } catch (error) {
         console.error("Error fetching schema:", error);
         res.status(500).json({ error: "Failed to fetch schema" });
       }
     });
-    //     app.get("/api/schema", async (req: Request, res: Response) => {
-    //       try {
-    //         const schema = await getSchemaForORM(ormType);
-    //         res.json(schema);
-    //       } catch (error) {
-    //         console.error("Error fetching schema:", error);
-    //         res.status(500).json({ error: "Failed to fetch schema" });
-    //       }
-    //     });
-
-    //     app.get("/api/tables/:tableName", async (req: Request, res: Response) => {
-    //       try {
-    //         const { tableName } = req.params;
-    //         // Basic validation
-    //         if (
-    //           typeof tableName !== "string" ||
-    //           !tableName.match(/^[a-zA-Z0-9_]+$/)
-    //         ) {
-    //           return res.status(400).json({ error: "Invalid table name" });
-    //         }
-    //         const data = await getTableData(ormType, tableName);
-    //         res.json(data);
-    //       } catch (error) {
-    //         console.error("Error fetching table data:", error);
-    //         res.status(500).json({ error: "Failed to fetch table data" });
-    //       }
-    //     });
 
     app.get("*", (req, res) => {
       res.sendFile(path.join(__dirname, "../dist/index.html"));

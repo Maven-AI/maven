@@ -8,15 +8,9 @@ export function runCLI() {
   program
     .version("1.0.0")
     .option("-p, --prisma", "Run with Prisma ORM")
-    .option("-c, --connection <string>", "Database connection string")
     .parse(process.argv);
 
   const options = program.opts();
-  const connectionString = options.connection;
-  if (!connectionString) {
-    console.error("Please provide a database connection string");
-    process.exit(1);
-  }
 
   type ORMType = "prisma" | "drizzle" | "other";
 
@@ -26,7 +20,7 @@ export function runCLI() {
   else if (options.orm) ormType = options.orm as ORMType;
 
   // Start the server after the build process completes
-  startServer(ormType, connectionString);
+  startServer(ormType);
 }
 
 runCLI();

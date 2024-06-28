@@ -1,11 +1,55 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useEffect, useState } from "react";
+interface SchemaField {
+  name: string;
+  type: string;
+  isRequired: boolean;
+  isList: boolean;
+  attributes?: string;
+}
 
+interface SchemaModel {
+  name: string;
+  fields: SchemaField[];
+}
+
+interface ParsedSchema {
+  databaseType: string;
+  models: SchemaModel[];
+  enums: { name: string; values: string[] }[];
+}
 export default function Component() {
+  const [schema, setSchema] = useState<ParsedSchema | null>(null);
+  const [expandedTables, setExpandedTables] = useState<{
+    [key: string]: boolean;
+  }>({});
+
+  useEffect(() => {
+    fetchSchema();
+  }, []);
+
+  const fetchSchema = async () => {
+    try {
+      const response = await fetch("http://localhost:4000/api/schema");
+      const data = await response.json();
+      setSchema(data);
+    } catch (error) {
+      console.error("Error fetching schema:", error);
+    }
+  };
+
+  const toggleTable = (tableName: string) => {
+    setExpandedTables((prev: any) => ({
+      ...prev,
+      [tableName]: !prev[tableName],
+    }));
+  };
+
   return (
-    <div className="flex flex-col h-screen ">
-      <header className=" py-4 px-6 bg-primary text-primary-foreground flex items-center justify-between">
+    <div className="flex flex-col h-screen">
+      <header className="py-4 px-6 bg-primary text-primary-foreground flex items-center justify-between">
         <div className="flex items-center gap-4">
           <DatabaseIcon className="w-6 h-6" />
           <h1 className="text-2xl font-bold font-geist">Maven studio</h1>
@@ -16,52 +60,47 @@ export default function Component() {
         </Button>
       </header>
       <main className="flex-1 grid grid-cols-[300px_1fr] gap-6 p-6">
-        <div className=" rounded-lg shadow-md p-4 space-y-4 ">
+        <div className="rounded-lg shadow-md p-4 space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-medium font-geist">Database Schema</h2>
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" onClick={fetchSchema}>
               <RefreshCwIcon className="w-5 h-5" />
             </Button>
           </div>
           <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <TableIcon className="w-5 h-5" />
-                <span className="font-geist">users</span>
+            {schema?.models.map((model: any) => (
+              <div key={model.name} className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <TableIcon className="w-5 h-5" />
+                    <span className="font-geist">{model.name}</span>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => toggleTable(model.name)}
+                  >
+                    <ChevronDownIcon className="w-5 h-5" />
+                  </Button>
+                </div>
+                {expandedTables[model.name] && (
+                  <div className="pl-6 space-y-1">
+                    {model.fields.map((field: any) => (
+                      <div key={field.name} className="flex items-center gap-2">
+                        <span className="text-sm font-geist">
+                          {field.name}: {field.type}
+                        </span>
+                        {field.attributes && (
+                          <span className="text-xs text-gray-500">
+                            {field.attributes}
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
-              <Button variant="ghost" size="icon">
-                <ChevronDownIcon className="w-5 h-5" />
-              </Button>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <TableIcon className="w-5 h-5" />
-                <span className="font-geist">posts</span>
-              </div>
-              <Button variant="ghost" size="icon">
-                <ChevronDownIcon className="w-5 h-5" />
-              </Button>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <TableIcon className="w-5 h-5" />
-                <span className="font-geist">comments</span>
-              </div>
-              <Button variant="ghost" size="icon">
-                <ChevronDownIcon className="w-5 h-5" />
-              </Button>
-            </div>
-          </div>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <MessageCircleIcon className="w-5 h-5" />
-                <span className="font-geist">Chats</span>
-              </div>
-              <Button variant="ghost" size="icon">
-                <ChevronDownIcon className="w-5 h-5" />
-              </Button>
-            </div>
+            ))}
           </div>
         </div>
         <div className=" rounded-lg shadow-md p-4 space-y-4 ">
@@ -181,25 +220,6 @@ function MaximizeIcon(props: any) {
       <path d="M21 8V5a2 2 0 0 0-2-2h-3" />
       <path d="M3 16v3a2 2 0 0 0 2 2h3" />
       <path d="M16 21h3a2 2 0 0 0 2-2v-3" />
-    </svg>
-  );
-}
-
-function MessageCircleIcon(props: any) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" />
     </svg>
   );
 }
