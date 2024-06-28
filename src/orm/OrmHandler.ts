@@ -15,7 +15,32 @@ interface SchemaModel {
   fields: SchemaField[];
 }
 
-function parseSchema(schemaContent: string): SchemaModel[] {
+export function findSchemaFile(
+  startPath: string,
+  fileName: string
+): string | null {
+  if (!fs.existsSync(startPath)) {
+    return null;
+  }
+
+  const files = fs.readdirSync(startPath);
+  for (const file of files) {
+    const filePath = path.join(startPath, file);
+    const stat = fs.lstatSync(filePath);
+    if (stat.isDirectory()) {
+      const result = findSchemaFile(filePath, fileName);
+      if (result) {
+        return result;
+      }
+    } else if (file === fileName) {
+      return filePath;
+    }
+  }
+
+  return null;
+}
+
+export function parseSchema(schemaContent: string): SchemaModel[] {
   const models: SchemaModel[] = [];
   const modelRegex = /model\s+(\w+)\s*{([^}]*)}/g;
   const fieldRegex = /(\w+)\s+([\w\.]+)(\?)?(\[\])?/g;
@@ -42,7 +67,7 @@ function parseSchema(schemaContent: string): SchemaModel[] {
   return models;
 }
 
-function getSchema(schemaPath: string): SchemaModel[] {
+export function getSchema(schemaPath: string): SchemaModel[] {
   try {
     const schemaContent = fs.readFileSync(schemaPath, "utf8");
     return parseSchema(schemaContent);
@@ -55,7 +80,10 @@ function getSchema(schemaPath: string): SchemaModel[] {
 export async function getSchemaForORM(ormType: ORMType): Promise<object> {
   switch (ormType) {
     case "prisma": {
-      const schemaPath = path.join(__dirname, "schema.prisma");
+      const schemaPath = findSchemaFile(process.cwd(), "schema.prisma");
+      if (!schemaPath) {
+        return { message: "Prisma schema file not found" };
+      }
       const schema = getSchema(schemaPath);
       return schema.length > 0
         ? schema

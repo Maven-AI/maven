@@ -18,6 +18,15 @@ export async function startServer(
 
     app.use(express.static(path.join(__dirname, "../dist")));
 
+    app.get("/api/schema", async (req: Request, res: Response) => {
+      try {
+        const schema = await getSchemaForORM(ormType);
+        res.json(schema);
+      } catch (error) {
+        console.error("Error fetching schema:", error);
+        res.status(500).json({ error: "Failed to fetch schema" });
+      }
+    });
     //     app.get("/api/schema", async (req: Request, res: Response) => {
     //       try {
     //         const schema = await getSchemaForORM(ormType);
