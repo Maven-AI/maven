@@ -1,6 +1,8 @@
 // import { useState, useEffect } from "react";
 // import axios from "axios";
 
+import Component from "./components/home";
+
 // interface Schema {
 //   message: string;
 // }
@@ -17,7 +19,7 @@ function App() {
 
   return (
     <div>
-      <h1 className="text-center text-3xl">Maven Studio - Under development</h1>
+      <Component />
       {/* {schema ? <pre>{JSON.stringify(schema, null, 2)}</pre> : "Loading..."} */}
     </div>
   );
