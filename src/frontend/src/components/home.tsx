@@ -8,7 +8,6 @@ import { ModeToggle } from "./mode-toggle";
 import {
   ChevronDownIcon,
   ChevronUpIcon,
-  CodeIcon,
   DatabaseIcon,
   MaximizeIcon,
   MicIcon,
@@ -17,6 +16,7 @@ import {
   SendIcon,
   TableIcon,
 } from "lucide-react";
+import { CodeCard } from "./code-card";
 interface SchemaField {
   name: string;
   type: string;
@@ -41,6 +41,8 @@ export default function Component() {
     [key: string]: boolean;
   }>({});
   const [schemaSummary, setSchemaSummary] = useState<string>("");
+
+  
 
   useEffect(() => {
     fetchSchema();
@@ -83,6 +85,7 @@ export default function Component() {
 
 
   //here is the endpoint for parsing the prompt and the schema
+  const [resultQuery,setResultQuery]= useState<string>("");
 
   const fetchParsedData = async () => {
     try {
@@ -97,13 +100,24 @@ export default function Component() {
       const data = await response.json();
       console.log("Parsed Data:", data);
       
-      console.log("Parsed prompt:", data.parsedPrompt);
-      console.log("Parsed schema:", data.parsedSchema);
+      if (data.query) {
+        setResultQuery(data.query);
+      } else {
+        setResultQuery("No query generated.");
+      }
+      
+      if (data.explanation) {
+        console.log("Explanation:", data.explanation);
+        // You might want to display this explanation somewhere in your UI
+      }
+      
+      console.log("Parsed prompt:", inputValue);
+      console.log("Parsed schema:", schema);
     } catch (error) {
       console.error("Error parsing data:", error);
+      setResultQuery("Error generating query.");
     }
   };
-
 
   const [inputValue, setInputValue] = useState('');
   const handleInputChanges = (e: any): void => {
@@ -207,18 +221,7 @@ export default function Component() {
                 Run
               </Button>
             </div>
-            <div className="rounded-lg p-4 space-y-2 bg-muted">
-              <div className="flex items-center gap-2">
-                <CodeIcon className="w-5 h-5" />
-                <span className="font-medium">Generated Code</span>
-              </div>
-              <pre className="text-sm">{`const users = await prisma.user.findMany({
-  include: {
-    posts: true,
-    comments: true,
-  },
-});`}</pre>
-            </div>
+            <CodeCard resultQuery={resultQuery}/>
           </div>
         </div>
       </main>

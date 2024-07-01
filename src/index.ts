@@ -58,14 +58,15 @@ export async function startServer(
           return res.status(400).json({ error: "Prompt and schema are required" });
         }
     
-        const sqlQuery = await parseData(prompt, schema,ormType, aiProvider, apiKey);
+        const result = await parseData(prompt, schema, ormType, aiProvider, apiKey);
     
-        console.log("Generated SQL Query:", sqlQuery);
+        console.log("Generated Query:", result.query);
+        console.log("Explanation:", result.explanation);
     
-        res.json({ sqlQuery });
+        res.json(result);
       } catch (error) {
         console.error("Error parsing data:", error);
-        res.status(500).json({ error: "Failed to generate SQL query" });
+        res.status(500).json({ error: "Failed to generate query" });
       }
     });
 
