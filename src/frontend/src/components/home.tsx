@@ -116,7 +116,7 @@ export default function Component() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-card ">
+    <div className="flex flex-col min-h-screen bg-card ">
       <header className="py-4 px-6 flex items-center border-b ">
         <div className="flex items-center gap-4">
           <DatabaseIcon className="w-6 h-6" />
