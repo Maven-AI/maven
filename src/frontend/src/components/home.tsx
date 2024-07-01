@@ -63,6 +63,43 @@ export default function Component() {
     }));
   };
 
+
+
+
+
+  //here is the endpoint for parsing the prompt and the schema
+
+  const fetchParsedData = async () => {
+    try {
+      const response = await fetch("http://localhost:4000/api/parse-data", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ prompt: inputValue, schema: schema }),
+      });
+      
+      const data = await response.json();
+      console.log("Parsed Data:", data);
+      
+      console.log("Parsed prompt:", data.parsedPrompt);
+      console.log("Parsed schema:", data.parsedSchema);
+    } catch (error) {
+      console.error("Error parsing data:", error);
+    }
+  };
+
+
+  const [inputValue, setInputValue] = useState('');
+  const handleInputChanges = (e: any): void => {
+    setInputValue(e.target.value);
+  };
+
+  const handleRunClick = (): void => {
+    console.log("The input prompt is:", inputValue);
+    fetchParsedData();
+  };
+
   return (
     <div className="flex flex-col h-screen">
       <header className="py-4 px-6 bg-primary text-primary-foreground flex items-center justify-between">
@@ -140,8 +177,10 @@ export default function Component() {
                 placeholder="Enter your prompt..."
                 className="flex-1"
                 autoComplete="off"
+                value={inputValue}
+                onChange={handleInputChanges}
               />
-              <Button variant="secondary">
+              <Button variant="secondary" onClick={handleRunClick}>
                 <SendIcon className="w-4 h-4 mr-2" />
                 Run
               </Button>
