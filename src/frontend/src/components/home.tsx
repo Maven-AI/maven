@@ -10,7 +10,7 @@ interface SchemaField {
   attributes?: string;
 }
 
-interface SchemaModel {
+export interface SchemaModel {
   name: string;
   fields: SchemaField[];
 }
@@ -25,6 +25,7 @@ export default function Component() {
   const [expandedTables, setExpandedTables] = useState<{
     [key: string]: boolean;
   }>({});
+  const [schemaSummary, setSchemaSummary] = useState<string>("");
 
   useEffect(() => {
     fetchSchema();
@@ -35,11 +36,26 @@ export default function Component() {
       const response = await fetch("http://localhost:4000/api/schema");
       const data = await response.json();
       setSchema(data);
+      await fetchSchemaSummary();
     } catch (error) {
       console.error("Error fetching schema:", error);
     }
   };
-
+  const fetchSchemaSummary = async () => {
+    try {
+      const response = await fetch(
+        "http://localhost:4000/api/summarize-schema",
+        {
+          method: "POST",
+        }
+      );
+      const data = await response.json();
+      console.log("Data", data);
+      setSchemaSummary(data.summary);
+    } catch (error) {
+      console.error("Error fetching schema summary:", error);
+    }
+  };
   const toggleTable = (tableName: string) => {
     setExpandedTables((prev: any) => ({
       ...prev,
@@ -110,7 +126,14 @@ export default function Component() {
               <MaximizeIcon className="w-5 h-5" />
             </Button>
           </div>
-          <div className="space-y-4 ">
+          <div className="space-y-4">
+            <Button onClick={fetchSchemaSummary}>Get Schema Summary</Button>
+            {schemaSummary && (
+              <div className="p-4 rounded-lg">
+                <h3 className="font-medium mb-2">Schema Summary:</h3>
+                <p>{schemaSummary}</p>
+              </div>
+            )}
             <div className="flex items-center gap-2">
               <MicIcon className="w-5 h-5" />
               <Input

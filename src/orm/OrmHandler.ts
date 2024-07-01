@@ -16,17 +16,17 @@ interface SchemaField {
   attributes?: string;
 }
 
-interface SchemaModel {
+export interface SchemaModel {
   name: string;
   fields: SchemaField[];
 }
 
-interface SchemaEnum {
+export interface SchemaEnum {
   name: string;
   values: string[];
 }
 
-interface ParsedSchema {
+export interface ParsedSchema {
   databaseType: string;
   models: SchemaModel[];
   enums: SchemaEnum[];
