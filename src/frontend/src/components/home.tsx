@@ -2,6 +2,21 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useEffect, useState } from "react";
+import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import { ModeToggle } from "./mode-toggle";
+import {
+  ChevronDownIcon,
+  ChevronUpIcon,
+  CodeIcon,
+  DatabaseIcon,
+  MaximizeIcon,
+  MicIcon,
+  PlusIcon,
+  RefreshCwIcon,
+  SendIcon,
+  TableIcon,
+} from "lucide-react";
 interface SchemaField {
   name: string;
   type: string;
@@ -64,46 +79,53 @@ export default function Component() {
   };
 
   return (
-    <div className="flex flex-col h-screen">
-      <header className="py-4 px-6 bg-primary text-primary-foreground flex items-center justify-between">
+    <div className="flex flex-col h-screen bg-card ">
+      <header className="py-4 px-6 flex items-center border-b ">
         <div className="flex items-center gap-4">
           <DatabaseIcon className="w-6 h-6" />
-          <h1 className="text-2xl font-bold font-geist">Maven studio</h1>
+          <h1 className="text-2xl font-bold dark:text">Maven studio</h1>
         </div>
-        <Button variant="secondary">
-          <PlusIcon className="w-4 h-4 mr-2" />
-          New Query
-        </Button>
+        <div className="ml-auto flex justify-center items-center gap-4">
+          <ModeToggle />
+          <Button variant="secondary">
+            <PlusIcon className="w-4 h-4 mr-2" />
+            New Query
+          </Button>
+        </div>
       </header>
-      <main className="flex-1 grid grid-cols-[300px_1fr] gap-6 p-6">
-        <div className="rounded-lg shadow-md p-4 space-y-4">
+      <main className="flex-1 grid grid-cols-[300px_1fr] ">
+        <div className=" shadow-md p-4 space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-medium font-geist">Database Schema</h2>
+            <h2 className="text-lg font-medium">Database Schema</h2>
             <Button variant="ghost" size="icon" onClick={fetchSchema}>
               <RefreshCwIcon className="w-5 h-5" />
             </Button>
           </div>
           <div className="space-y-2">
-            {schema?.models.map((model: any) => (
+            {schema?.models.map((model) => (
               <div key={model.name} className="space-y-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <TableIcon className="w-5 h-5" />
-                    <span className="font-geist">{model.name}</span>
+                    <span>{model.name}</span>
                   </div>
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={() => toggleTable(model.name)}
                   >
-                    <ChevronDownIcon className="w-5 h-5" />
+                    {expandedTables[model.name] ? (
+                      <ChevronUpIcon className="w-5 h-5" />
+                    ) : (
+                      <ChevronDownIcon className="w-5 h-5" />
+                    )}
                   </Button>
                 </div>
                 {expandedTables[model.name] && (
                   <div className="pl-6 space-y-1">
-                    {model.fields.map((field: any) => (
+                    {model.fields.map((field) => (
                       <div key={field.name} className="flex items-center gap-2">
-                        <span className="text-sm font-geist">
+                        <span className="text-sm">
                           {field.name}: {field.type}
                         </span>
                         {field.attributes && (
@@ -119,9 +141,9 @@ export default function Component() {
             ))}
           </div>
         </div>
-        <div className=" rounded-lg shadow-md p-4 space-y-4 ">
+        <div className="border-l  shadow-md p-4 space-y-4 ">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-medium font-geist">Query Builder</h2>
+            <h2 className="text-lg font-medium">Query Builder</h2>
             <Button variant="ghost" size="icon">
               <MaximizeIcon className="w-5 h-5" />
             </Button>
@@ -129,9 +151,9 @@ export default function Component() {
           <div className="space-y-4">
             <Button onClick={fetchSchemaSummary}>Get Schema Summary</Button>
             {schemaSummary && (
-              <div className="p-4 rounded-lg">
+              <div className="p-4 rounded-lg bg-muted">
                 <h3 className="font-medium mb-2">Schema Summary:</h3>
-                <p>{schemaSummary}</p>
+                <Markdown remarkPlugins={[remarkGfm]}>{schemaSummary}</Markdown>
               </div>
             )}
             <div className="flex items-center gap-2">
@@ -146,12 +168,12 @@ export default function Component() {
                 Run
               </Button>
             </div>
-            <div className=" rounded-lg p-4 space-y-2">
+            <div className="rounded-lg p-4 space-y-2 bg-muted">
               <div className="flex items-center gap-2">
                 <CodeIcon className="w-5 h-5" />
-                <span className="font-medium font-geist">Generated Code</span>
+                <span className="font-medium">Generated Code</span>
               </div>
-              <pre className="text-sm text-muted-foreground font-geist">{`const users = await prisma.user.findMany({
+              <pre className="text-sm">{`const users = await prisma.user.findMany({
   include: {
     posts: true,
     comments: true,
@@ -162,192 +184,5 @@ export default function Component() {
         </div>
       </main>
     </div>
-  );
-}
-
-function ChevronDownIcon(props: any) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="m6 9 6 6 6-6" />
-    </svg>
-  );
-}
-
-function CodeIcon(props: any) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <polyline points="16 18 22 12 16 6" />
-      <polyline points="8 6 2 12 8 18" />
-    </svg>
-  );
-}
-
-function DatabaseIcon(props: any) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <ellipse cx="12" cy="5" rx="9" ry="3" />
-      <path d="M3 5V19A9 3 0 0 0 21 19V5" />
-      <path d="M3 12A9 3 0 0 0 21 12" />
-    </svg>
-  );
-}
-
-function MaximizeIcon(props: any) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M8 3H5a2 2 0 0 0-2 2v3" />
-      <path d="M21 8V5a2 2 0 0 0-2-2h-3" />
-      <path d="M3 16v3a2 2 0 0 0 2 2h3" />
-      <path d="M16 21h3a2 2 0 0 0 2-2v-3" />
-    </svg>
-  );
-}
-
-function MicIcon(props: any) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
-      <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-      <line x1="12" x2="12" y1="19" y2="22" />
-    </svg>
-  );
-}
-
-function PlusIcon(props: any) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M5 12h14" />
-      <path d="M12 5v14" />
-    </svg>
-  );
-}
-
-function RefreshCwIcon(props: any) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
-      <path d="M21 3v5h-5" />
-      <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
-      <path d="M8 16H3v5" />
-    </svg>
-  );
-}
-
-function SendIcon(props: any) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="m22 2-7 20-4-9-9-4Z" />
-      <path d="M22 2 11 13" />
-    </svg>
-  );
-}
-
-function TableIcon(props: any) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M12 3v18" />
-      <rect width="18" height="18" x="3" y="3" rx="2" />
-      <path d="M3 9h18" />
-      <path d="M3 15h18" />
-    </svg>
   );
 }
