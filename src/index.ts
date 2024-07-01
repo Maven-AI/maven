@@ -3,7 +3,7 @@ import express, { Request, Response } from "express";
 import cors from "cors";
 import path from "path";
 import { ORMType, getSchemaForORM } from "./orm/OrmHandler";
-import { summarizeSchema } from "./ai/aiHandler";
+import { summarizeSchema } from "./ai/summary";
 
 export async function startServer(
   ormType: ORMType,
