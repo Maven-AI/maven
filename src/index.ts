@@ -46,23 +46,26 @@ export async function startServer(
       }
     });
 
-
-
-
-    // This is to parse both the schema and the prompt
     app.post("/api/parse-data", async (req: Request, res: Response) => {
       try {
         const { prompt, schema } = req.body;
-    
+
         if (!prompt || !schema) {
-          return res.status(400).json({ error: "Prompt and schema are required" });
+          return res
+            .status(400)
+            .json({ error: "Prompt and schema are required" });
         }
-    
-        const result = await parseData(prompt, schema, ormType, aiProvider, apiKey);
-    
+
+        const result = await parseData(
+          prompt,
+          schema,
+          ormType,
+          aiProvider,
+          apiKey
+        );
+
         console.log("Generated Query:", result.query);
-        console.log("Explanation:", result.explanation);
-    
+
         res.json(result);
       } catch (error) {
         console.error("Error parsing data:", error);

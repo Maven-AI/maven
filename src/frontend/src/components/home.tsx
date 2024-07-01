@@ -41,12 +41,8 @@ export default function Component() {
     [key: string]: boolean;
   }>({});
   const [schemaSummary, setSchemaSummary] = useState<string>("");
-
-  
-
-  useEffect(() => {
-    fetchSchema();
-  }, []);
+  const [resultQuery, setResultQuery] = useState<string>("");
+  const [inputValue, setInputValue] = useState("");
 
   const fetchSchema = async () => {
     try {
@@ -80,13 +76,6 @@ export default function Component() {
     }));
   };
 
-
-
-
-
-  //here is the endpoint for parsing the prompt and the schema
-  const [resultQuery,setResultQuery]= useState<string>("");
-
   const fetchParsedData = async () => {
     try {
       const response = await fetch("http://localhost:4000/api/parse-data", {
@@ -96,21 +85,15 @@ export default function Component() {
         },
         body: JSON.stringify({ prompt: inputValue, schema: schema }),
       });
-      
       const data = await response.json();
       console.log("Parsed Data:", data);
-      
+
       if (data.query) {
         setResultQuery(data.query);
       } else {
         setResultQuery("No query generated.");
       }
-      
-      if (data.explanation) {
-        console.log("Explanation:", data.explanation);
-        // You might want to display this explanation somewhere in your UI
-      }
-      
+
       console.log("Parsed prompt:", inputValue);
       console.log("Parsed schema:", schema);
     } catch (error) {
@@ -119,7 +102,6 @@ export default function Component() {
     }
   };
 
-  const [inputValue, setInputValue] = useState('');
   const handleInputChanges = (e: any): void => {
     setInputValue(e.target.value);
   };
@@ -128,6 +110,10 @@ export default function Component() {
     console.log("The input prompt is:", inputValue);
     fetchParsedData();
   };
+
+  useEffect(() => {
+    fetchSchema();
+  }, []);
 
   return (
     <div className="flex flex-col min-h-screen bg-card ">
@@ -221,7 +207,7 @@ export default function Component() {
                 Run
               </Button>
             </div>
-            <CodeCard resultQuery={resultQuery}/>
+            <CodeCard resultQuery={resultQuery} />
           </div>
         </div>
       </main>
