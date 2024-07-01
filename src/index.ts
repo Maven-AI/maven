@@ -4,6 +4,7 @@ import cors from "cors";
 import path from "path";
 import { ORMType, getSchemaForORM } from "./orm/OrmHandler";
 import { summarizeSchema } from "./ai/summary";
+import { parseData } from "./ai/query";
 
 export async function startServer(
   ormType: ORMType,
@@ -42,6 +43,29 @@ export async function startServer(
       } catch (error) {
         console.error("Error summarizing schema:", error);
         res.status(500).json({ error: "Failed to summarize schema" });
+      }
+    });
+
+
+
+
+    // This is to parse both the schema and the prompt
+    app.post("/api/parse-data", async (req: Request, res: Response) => {
+      try {
+        const { prompt, schema } = req.body;
+    
+        if (!prompt || !schema) {
+          return res.status(400).json({ error: "Prompt and schema are required" });
+        }
+    
+        const sqlQuery = await parseData(prompt, schema,ormType, aiProvider, apiKey);
+    
+        console.log("Generated SQL Query:", sqlQuery);
+    
+        res.json({ sqlQuery });
+      } catch (error) {
+        console.error("Error parsing data:", error);
+        res.status(500).json({ error: "Failed to generate SQL query" });
       }
     });
 
