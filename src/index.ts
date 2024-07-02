@@ -1,10 +1,10 @@
-#!/usr/bin/env node
 import express, { Request, Response } from "express";
 import cors from "cors";
 import path from "path";
 import { ORMType, getSchemaForORM } from "./orm/OrmHandler";
 import { summarizeSchema } from "./ai/summary";
 import { parseData } from "./ai/query";
+import { queryHistory } from "./ai/queryHistory";
 
 export async function startServer(
   ormType: ORMType,
@@ -24,7 +24,7 @@ export async function startServer(
         if (!schema) {
           schema = await getSchemaForORM(ormType);
         }
-        console.log(schema);
+        console.log("Sending schema:", schema);
         res.json(schema);
       } catch (error) {
         console.error("Error fetching schema:", error);
@@ -38,7 +38,7 @@ export async function startServer(
           schema = await getSchemaForORM(ormType);
         }
         const summary = await summarizeSchema(schema, aiProvider, apiKey);
-        console.log("Summary", summary);
+        console.log("Sending summary:", summary);
         res.json({ summary });
       } catch (error) {
         console.error("Error summarizing schema:", error);
@@ -49,13 +49,11 @@ export async function startServer(
     app.post("/api/parse-data", async (req: Request, res: Response) => {
       try {
         const { prompt, schema } = req.body;
-
         if (!prompt || !schema) {
           return res
             .status(400)
             .json({ error: "Prompt and schema are required" });
         }
-
         const result = await parseData(
           prompt,
           schema,
@@ -63,14 +61,23 @@ export async function startServer(
           aiProvider,
           apiKey
         );
-
         console.log("Generated Query:", result.query);
+
+        // Add the query to history
+        queryHistory.addQuery(prompt, result.query);
+        console.log("Updated query history:", queryHistory.getHistory());
 
         res.json(result);
       } catch (error) {
         console.error("Error parsing data:", error);
         res.status(500).json({ error: "Failed to generate query" });
       }
+    });
+
+    app.get("/api/query-history", (req: Request, res: Response) => {
+      const history = queryHistory.getHistory();
+      console.log("Sending query history:", history);
+      res.json(history);
     });
 
     app.get("*", (req, res) => {
