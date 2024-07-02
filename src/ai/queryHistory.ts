@@ -13,7 +13,8 @@ class QueryHistory {
   private filePath: string;
 
   constructor() {
-    this.filePath = path.join(__dirname, "queryHistory.json");
+    this.filePath = path.resolve(__dirname, "../../dist/queryHistory.json");
+    console.log("Query history file path:", this.filePath);
     this.loadHistory();
   }
 
@@ -23,6 +24,11 @@ class QueryHistory {
         const data = fs.readFileSync(this.filePath, "utf8");
         this.history = JSON.parse(data);
         console.log("Loaded query history:", this.history);
+      } else {
+        console.log(
+          "No existing query history file found. Creating a new one."
+        );
+        this.saveHistory();
       }
     } catch (error) {
       console.error("Error loading query history:", error);
@@ -50,6 +56,9 @@ class QueryHistory {
   }
 
   getHistory(): QueryEntry[] {
+    if (this.history.length === 0) {
+      this.loadHistory();
+    }
     return this.history;
   }
 }

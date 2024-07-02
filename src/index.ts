@@ -75,13 +75,14 @@ export async function startServer(
     });
 
     app.get("/api/query-history", (req: Request, res: Response) => {
-      const history = queryHistory.getHistory();
-      console.log("Sending query history:", history);
-      res.json(history);
-    });
-
-    app.get("*", (req, res) => {
-      res.sendFile(path.join(__dirname, "../dist/index.html"));
+      try {
+        const history = queryHistory.getHistory();
+        console.log("Sending query history:", history);
+        res.json(history);
+      } catch (error) {
+        console.error("Error retrieving query history:", error);
+        res.status(500).json({ error: "Failed to retrieve query history" });
+      }
     });
 
     const PORT = 4000;
