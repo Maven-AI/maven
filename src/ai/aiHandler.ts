@@ -1,5 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
 
 export interface AIHandler {
   generateContent(prompt: string): Promise<string>;
@@ -20,6 +21,28 @@ class GeminiHandler implements AIHandler {
       return result.response.text();
     } catch (error) {
       console.error("Error using Gemini AI:", error);
+      throw error;
+    }
+  }
+}
+
+class OpenAIHandler implements AIHandler {
+  private openai;
+  constructor(apiKey: string) {
+    this.openai = new OpenAI({
+      apiKey,
+    });
+  }
+
+  async generateContent(prompt: string): Promise<string> {
+    try {
+      const response = await this.openai.chat.completions.create({
+        model: "gpt-3.5-turbo",
+        messages: [{ role: "user", content: prompt }],
+      });
+      return response.choices[0].message.content || "";
+    } catch (error) {
+      console.error("Error using OpenAI:", error);
       throw error;
     }
   }
@@ -53,6 +76,8 @@ export function createAIHandler(aiProvider: string, apiKey: string): AIHandler {
       return new GeminiHandler(apiKey);
     case "claude":
       return new ClaudeHandler(apiKey);
+    case "openai":
+      return new OpenAIHandler(apiKey);
     default:
       throw new Error(`Unsupported AI provider: ${aiProvider}`);
   }

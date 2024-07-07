@@ -74,3 +74,39 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Define scrollbar colors for light mode */
+:root {
+  --scrollbar-thumb: #888;
+  --scrollbar-track: #f1f1f1;
+}
+
+/* Define scrollbar colors for dark mode */
+.dark {
+  --scrollbar-thumb: #888;
+  --scrollbar-track: #000000;
+}
+
+/* For WebKit browsers */
+::-webkit-scrollbar {
+  width: 5px; /* Adjust the width of the scrollbar */
+  height: 5px; /* Adjust the height of the scrollbar (for horizontal scrollbar) */
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track); /* Use custom property for track color */
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb); /* Use custom property for thumb color */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #666; /* Darken the thumb color on hover */
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track); /* Use custom properties for thumb and track colors */
+}

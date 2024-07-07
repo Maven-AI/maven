@@ -21,11 +21,9 @@ Provide a brief overview that a developer could quickly read to understand the s
 
     return await aiHandler.generateContent(prompt);
   } catch (error) {
-    console.error(`Error summarizing schema with ${aiProvider}:`, error);
     return generateDefaultSummary(schema);
   }
 }
-
 function generateSchemaDescription(schema: ParsedSchema): string {
   let description = `Database type: ${schema.databaseType}\n\n`;
   description += "Models:\n";

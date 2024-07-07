@@ -49,6 +49,8 @@ export async function startServer(
     app.post("/api/parse-data", async (req: Request, res: Response) => {
       try {
         const { prompt, schema } = req.body;
+        const summary = await summarizeSchema(schema, aiProvider, apiKey);
+        const history = queryHistory.getHistory();
         if (!prompt || !schema) {
           return res
             .status(400)
@@ -57,6 +59,8 @@ export async function startServer(
         const result = await parseData(
           prompt,
           schema,
+          summary,
+          history,
           ormType,
           aiProvider,
           apiKey
