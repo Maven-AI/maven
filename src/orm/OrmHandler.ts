@@ -70,7 +70,8 @@ export function parseSchema(schemaContent: string): ParsedSchema {
   // Parse models
   const modelRegex = /model\s+(\w+)\s*{([^}]*)}/g;
   const fieldRegex =
-    /(\w+)\s+([\w\.]+)(\?)?(\[\])?(\s+@relation\(([^)]+)\))?(\s+@\w+(\([^)]+\))?)?/g;
+    /(\w+)\s+([\w\.]+)(\?)?(\[\])?(\s+@relation\(([^)]+)\))?((\s+@\w+(\([^)]+\))?)+)?/g;
+
   let modelMatch;
 
   while ((modelMatch = modelRegex.exec(schemaContent)) !== null) {
@@ -181,10 +182,3 @@ export async function connectDatabase(
 export async function getTableData(ormType: ORMType, tableName: string) {
   // Fetch data based on ORM type and table name
 }
-
-// Usage
-// (async () => {
-//   const ormType: ORMType = "prisma"; // Example ORM type
-//   const schema = await getSchemaForORM(ormType);
-//   console.log(JSON.stringify(schema, null, 2));
-// })();
