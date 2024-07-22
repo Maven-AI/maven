@@ -1,7 +1,5 @@
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = []
-  binaryTargets   = ["debian-openssl-1.1.x", "linux-arm64-openssl-3.0.x", "native"]
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -9,306 +7,70 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Access {
-  alias         String?
-  createdAt     DateTime           @default(now())
-  granteeUserId String?
-  id            String             @id @default(uuid())
-  permissions   AccessPermission[] @default([READ_RESTRICTED])
-  updatedAt     DateTime           @updatedAt
-  userId        String
-  GranteeUser   User?              @relation("accessGet", fields: [granteeUserId], onDelete: Cascade, references: [id])
-  User          User               @relation("accessGive", fields: [userId], onDelete: Cascade, references: [id])
-
-  @@index([alias])
-  @@index([granteeUserId])
-  @@index([userId])
-}
-
-model Account {
-  balance    Float            @default(0)
-  balances   AccountBalance[]
-  comment    String?
-  createdAt  DateTime         @default(now())
-  currency   String?
-  id         String           @default(uuid())
-  isExcluded Boolean          @default(false)
-  name       String?
-  platformId String?
-  updatedAt  DateTime         @updatedAt
-  userId     String
-  Platform   Platform?        @relation(fields: [platformId], references: [id])
-  User       User             @relation(fields: [userId], onDelete: Cascade, references: [id])
-  Order      Order[]
-
-  @@id([id, userId])
-  @@index([currency])
-  @@index([id])
-  @@index([isExcluded])
-  @@index([name])
-  @@index([userId])
-}
-
-model AccountBalance {
-  accountId String
-  createdAt DateTime @default(now())
-  date      DateTime @default(now())
-  id        String   @id @default(uuid())
-  updatedAt DateTime @updatedAt
-  userId    String
-  value     Float
-  Account   Account  @relation(fields: [accountId, userId], onDelete: Cascade, references: [id, userId])
-
-  @@unique([accountId, date])
-  @@index([accountId])
-  @@index([date])
-}
-
-model Analytics {
-  activityCount Int      @default(0)
-  country       String?
-  updatedAt     DateTime @updatedAt
-  userId        String   @id
-  User          User     @relation(fields: [userId], onDelete: Cascade, references: [id])
-
-  @@index([updatedAt])
-}
-
-model AuthDevice {
-  createdAt           DateTime @default(now())
-  credentialId        Bytes
-  credentialPublicKey Bytes
-  counter             Int
-  id                  String   @id @default(uuid())
-  updatedAt           DateTime @updatedAt
-  userId              String
-  User                User     @relation(fields: [userId], onDelete: Cascade, references: [id])
-
-  @@index([userId])
-}
-
-model MarketData {
-  createdAt   DateTime        @default(now())
-  dataSource  DataSource
-  date        DateTime
-  id          String          @id @default(uuid())
-  marketPrice Float
-  state       MarketDataState @default(CLOSE)
-  symbol      String
-
-  @@unique([dataSource, date, symbol])
-  @@index([dataSource])
-  @@index([dataSource, symbol])
-  @@index([date])
-  @@index([marketPrice])
-  @@index([state])
-  @@index([symbol])
-}
-
-model Order {
-  accountId       String?
-  accountUserId   String?
-  comment         String?
-  createdAt       DateTime      @default(now())
-  currency        String?
-  date            DateTime
-  fee             Float
-  id              String        @id @default(uuid())
-  isDraft         Boolean       @default(false)
-  quantity        Float
-  symbolProfileId String
-  type            Type
-  unitPrice       Float
-  updatedAt       DateTime      @updatedAt
-  userId          String
-  Account         Account?      @relation(fields: [accountId, accountUserId], references: [id, userId])
-  SymbolProfile   SymbolProfile @relation(fields: [symbolProfileId], references: [id])
-  User            User          @relation(fields: [userId], onDelete: Cascade, references: [id])
-  tags            Tag[]
-
-  @@index([accountId])
-  @@index([date])
-  @@index([isDraft])
-  @@index([userId])
-}
-
-model Platform {
-  id      String    @id @default(uuid())
-  name    String?
-  url     String    @unique
-  Account Account[]
-
-  @@index([name])
-}
-
-model Property {
-  key   String @id
-  value String
-}
-
-model Settings {
-  settings  Json?
-  updatedAt DateTime @updatedAt
-  userId    String   @id
-  User      User     @relation(fields: [userId], onDelete: Cascade, references: [id])
-}
-
-model SymbolProfile {
-  assetClass             AssetClass?
-  assetSubClass          AssetSubClass?
-  comment                String?
-  countries              Json?
-  createdAt              DateTime                @default(now())
-  currency               String
-  dataSource             DataSource
-  figi                   String?
-  figiComposite          String?
-  figiShareClass         String?
-  holdings               Json?                   @default("[]")
-  id                     String                  @id @default(uuid())
-  isin                   String?
-  name                   String?
-  updatedAt              DateTime                @updatedAt
-  scraperConfiguration   Json?
-  sectors                Json?
-  symbol                 String
-  symbolMapping          Json?
-  url                    String?
-  Order                  Order[]
-  SymbolProfileOverrides SymbolProfileOverrides?
-
-  @@unique([dataSource, symbol])
-  @@index([assetClass])
-  @@index([currency])
-  @@index([dataSource])
-  @@index([isin])
-  @@index([name])
-  @@index([symbol])
-}
-
-model SymbolProfileOverrides {
-  assetClass      AssetClass?
-  assetSubClass   AssetSubClass?
-  countries       Json?          @default("[]")
-  holdings        Json?          @default("[]")
-  name            String?
-  sectors         Json?          @default("[]")
-  url             String?
-  symbolProfileId String         @id
-  updatedAt       DateTime       @updatedAt
-  SymbolProfile   SymbolProfile  @relation(fields: [symbolProfileId], onDelete: Cascade, references: [id])
-}
-
-model Subscription {
-  createdAt DateTime @default(now())
-  expiresAt DateTime
-  id        String   @id @default(uuid())
-  price     Float?
-  updatedAt DateTime @updatedAt
-  userId    String
-  User      User     @relation(fields: [userId], onDelete: Cascade, references: [id])
-
-  @@index([userId])
-}
-
-model Tag {
-  id     String  @id @default(uuid())
-  name   String  @unique
-  orders Order[]
-
-  @@index([name])
-}
-
 model User {
-  accessToken   String?
-  authChallenge String?
-  createdAt     DateTime       @default(now())
-  id            String         @id @default(uuid())
-  provider      Provider       @default(ANONYMOUS)
-  role          Role           @default(USER)
-  thirdPartyId  String?
-  updatedAt     DateTime       @updatedAt
-  Access        Access[]       @relation("accessGet")
-  AccessGive    Access[]       @relation("accessGive")
-  Account       Account[]
-  Analytics     Analytics?
-  AuthDevice    AuthDevice[]
-  Order         Order[]
-  Settings      Settings?
-  Subscription  Subscription[]
-
-  @@index([accessToken])
-  @@index([createdAt])
-  @@index([provider])
-  @@index([role])
-  @@index([thirdPartyId])
+  id           String         @id @default(uuid())
+  email        String         @unique
+  name         String?
+  password     String
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  profile      Profile?
+  posts        Post[]
+  categories   Category[]     @relation("CategoryAuthor")
+  comments     Comment[]
+  role         Role           @default(USER)
+  @@index([email])
 }
 
-enum AccessPermission {
-  READ
-  READ_RESTRICTED
+model Profile {
+  id        String   @id @default(uuid())
+  bio       String?
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-enum AssetClass {
-  COMMODITY
-  EQUITY
-  FIXED_INCOME
-  LIQUIDITY
-  REAL_ESTATE
+model Post {
+  id         String       @id @default(uuid())
+  title      String
+  content    String
+  published  Boolean      @default(false)
+  authorId   String
+  author     User         @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  comments   Comment[]
+  categories Category[]   @relation("PostCategories")
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  @@index([title])
+  @@index([published])
 }
 
-enum AssetSubClass {
-  BOND
-  CASH
-  COMMODITY
-  CRYPTOCURRENCY
-  ETF
-  MUTUALFUND
-  PRECIOUS_METAL
-  PRIVATE_EQUITY
-  STOCK
+model Comment {
+  id        String   @id @default(uuid())
+  content   String
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-enum DataSource {
-  ALPHA_VANTAGE
-  COINGECKO
-  EOD_HISTORICAL_DATA
-  FINANCIAL_MODELING_PREP
-  GOOGLE_SHEETS
-  MANUAL
-  RAPID_API
-  YAHOO
-}
-
-enum MarketDataState {
-  CLOSE
-  INTRADAY
-}
-
-enum Provider {
-  ANONYMOUS
-  GOOGLE
-  INTERNET_IDENTITY
+model Category {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  description String?
+  posts       Post[]    @relation("PostCategories")
+  authorId    String?
+  author      User?     @relation("CategoryAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  @@index([name])
 }
 
 enum Role {
-  ADMIN
-  DEMO
-  INACTIVE
   USER
-}
-
-enum Type {
-  BUY
-  DIVIDEND
-  FEE
-  INTEREST
-  ITEM
-  LIABILITY
-  SELL
-}
-
-enum ViewMode {
-  DEFAULT
-  ZEN
+  ADMIN
+  EDITOR
 }
