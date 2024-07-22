@@ -23,10 +23,10 @@ class QueryHistory {
       if (fs.existsSync(this.filePath)) {
         const data = fs.readFileSync(this.filePath, "utf8");
         this.history = JSON.parse(data);
-        console.log("Loaded query history:", this.history);
+        // console.log("Loaded query history:", this.history);
       } else {
         console.log(
-          "No existing query history file found. Creating a new one."
+          "No existing query history file found. Creating a new one by writing a prompt."
         );
         this.saveHistory();
       }
@@ -38,7 +38,7 @@ class QueryHistory {
   private saveHistory(): void {
     try {
       fs.writeFileSync(this.filePath, JSON.stringify(this.history, null, 2));
-      console.log("Saved query history:", this.history);
+      // console.log("Saved query history:", this.history);
     } catch (error) {
       console.error("Error saving query history:", error);
     }

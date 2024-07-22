@@ -19,13 +19,14 @@ export async function parseData(
 
   try {
     const aiHandler = createAIHandler(aiProvider, apiKey);
+    const limitedHistory = history.slice(-5);
     const aiPrompt = `Generate a ${ormType} query based on the following information:
 - User's request: ${prompt}
 - ORM type: ${ormType}
 - Database type: ${schema.databaseType}
 - Schema: ${JSON.stringify(schema)}
 - Summary of the schema : ${summary}
-- History of previous queries: ${JSON.stringify(history)}
+-  History of previous queries: ${JSON.stringify(limitedHistory)}
 Guidelines:
 1. Only return the ${ormType} query without any comments.
 2. Ensure the query conforms to ${ormType} standards and not raw ${
@@ -33,9 +34,10 @@ Guidelines:
     } SQL.
 3. The query should be complete and ready to execute.
 4. Double-check (triple-check) the query for accuracy before providing the final response.
+5. The query should be in a complete TypeScript/JavaScript code snippet format.
 Provide only the query without any additional comments or explanations.
 
-Query should always be in ${ormType} syntax format!!!!!!
+Query should always be in ${ormType} syntax format and in complete TypeScript/JavaScript code snippet!!
 
 Examples of ${ormType} queries:
 
@@ -62,7 +64,7 @@ const users = await db.select().from(users)
   .fields('id', 'name', 'email');
 \`\`\`
 
-Please write the query now. in ${ormType} format please..`;
+Please write the query now. in ${ormType} format in complete TypeScript/JavaScript code snippet..Always write the minimal query. Refer the history, don't over complicate stuff.`;
 
     const response = await aiHandler.generateContent(aiPrompt);
     console.log("AI Response:", response);

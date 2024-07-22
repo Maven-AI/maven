@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -53,6 +53,7 @@ export default function Home() {
   const [inputValue, setInputValue] = useState("");
   const [queryHistory, setQueryHistory] = useState<QueryHistoryEntry[]>([]);
   const [loading, setLoading] = useState(false);
+  const [queryLoading, setQueryLoading] = useState(false);
 
   const fetchSchema = async () => {
     try {
@@ -76,6 +77,7 @@ export default function Home() {
 
   const fetchParsedData = async () => {
     try {
+      setQueryLoading(true);
       const response = await fetch("http://localhost:4000/api/parse-data", {
         method: "POST",
         headers: {
@@ -84,22 +86,12 @@ export default function Home() {
         body: JSON.stringify({ prompt: inputValue, schema: schema }),
       });
       const data = await response.json();
-      console.log("Parsed Data:", data);
-
-      if (
-        data.query &&
-        !data.query.includes("Please provide valid AI provider and API key")
-      ) {
-        setResultQuery(data.query);
-      } else {
-        setResultQuery("No query generated.");
-      }
-
-      console.log("Parsed prompt:", inputValue);
-      console.log("Parsed schema:", schema);
+      setResultQuery(data.query || "No query generated.");
     } catch (error) {
       console.error("Error parsing data:", error);
       setResultQuery("Error generating query.");
+    } finally {
+      setQueryLoading(false);
     }
   };
 
@@ -108,7 +100,7 @@ export default function Home() {
   };
 
   const handleRunClick = async (): Promise<void> => {
-    console.log("The input prompt is:", inputValue);
+    // console.log("The input prompt is:", inputValue);
     await fetchParsedData();
     await fetchQueryHistory();
   };
@@ -118,11 +110,12 @@ export default function Home() {
       setLoading(true);
       const response = await fetch("http://localhost:4000/api/query-history");
       const data = await response.json();
-      console.log("Fetched query history:", data);
+      // console.log("Fetched query history:", data);
       setQueryHistory(data);
     } catch (error) {
       console.error("Error fetching query history:", error);
     } finally {
+      setInputValue("");
       setLoading(false);
     }
   };
@@ -194,21 +187,28 @@ export default function Home() {
           </Button>
         </div>
         <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <MicIcon className="w-5 h-5" />
-            <Input
-              placeholder="Enter your prompt..."
-              className="flex-1"
-              autoComplete="off"
-              value={inputValue}
-              onChange={handleInputChanges}
-            />
-            <Button variant="secondary" onClick={handleRunClick}>
-              <SendIcon className="w-4 h-4 mr-2" />
-              Run
-            </Button>
-          </div>
-          <CodeCard resultQuery={resultQuery} />
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleRunClick();
+            }}
+          >
+            <div className="flex items-center gap-2">
+              <MicIcon className="w-5 h-5" />
+              <Input
+                placeholder="Enter your prompt..."
+                className="flex-1"
+                autoComplete="off"
+                value={inputValue}
+                onChange={handleInputChanges}
+              />
+              <Button type="submit" variant="secondary">
+                <SendIcon className="w-4 h-4 mr-2" />
+                Run
+              </Button>
+            </div>
+          </form>
+          <CodeCard resultQuery={resultQuery} loading={queryLoading} />
 
           <div className="mt-8">
             <h3 className="text-lg font-medium mb-4">Query History</h3>

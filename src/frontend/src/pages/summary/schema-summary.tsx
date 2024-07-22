@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { Button } from "@/components/ui/button";
-import { SkeletonPage } from "@/components/comps/skeleton-card";
+import { SkeletonList } from "@/components/comps/skeleton-card";
 
 export default function SchemaSummary() {
   const [schemaSummary, setSchemaSummary] = useState<string | null>(null);
@@ -13,6 +12,7 @@ export default function SchemaSummary() {
   }, []);
 
   const fetchSchemaSummary = async () => {
+    console.log("Fetching schema summary...");
     setIsLoading(true);
     try {
       const response = await fetch(
@@ -22,7 +22,7 @@ export default function SchemaSummary() {
         }
       );
       const data = await response.json();
-      console.log("Schema summary:", data);
+      // console.log("Schema summary:", data);
       setSchemaSummary(data.summary);
     } catch (error) {
       console.error("Error fetching schema summary:", error);
@@ -33,20 +33,19 @@ export default function SchemaSummary() {
   };
 
   return (
-    <div className="h-screen overflow-y-auto">
-      <h2 className="text-lg font-medium mb-4">Schema Summary</h2>
+    <div className="h-screen overflow-y-auto flex flex-col items-center">
+      <h2 className="text-lg font-medium mb-4 w-full text-center my-6">
+        Schema Summary
+      </h2>
       {isLoading ? (
-        <SkeletonPage />
+        <SkeletonList />
       ) : schemaSummary ? (
-        <div className="p-4 rounded-lg bg-muted">
+        <div className="p-4 rounded-lg bg-muted max-w-1/2 ">
           <Markdown remarkPlugins={[remarkGfm]}>{schemaSummary}</Markdown>
         </div>
       ) : (
         <p>Error fetching schema summary</p>
       )}
-      <Button onClick={fetchSchemaSummary} className="mt-4">
-        Refresh Schema Summary
-      </Button>
     </div>
   );
 }

@@ -70,7 +70,8 @@ export function parseSchema(schemaContent: string): ParsedSchema {
   // Parse models
   const modelRegex = /model\s+(\w+)\s*{([^}]*)}/g;
   const fieldRegex =
-    /(\w+)\s+([\w\.]+)(\?)?(\[\])?(\s+@relation\(([^)]+)\))?(\s+@\w+(\([^)]+\))?)?/g;
+    /(\w+)\s+([\w\.]+)(\?)?(\[\])?(\s+@relation\(([^)]+)\))?((\s+@\w+(\([^)]+\))?)+)?/g;
+
   let modelMatch;
 
   while ((modelMatch = modelRegex.exec(schemaContent)) !== null) {
